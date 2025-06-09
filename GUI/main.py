@@ -1,9 +1,19 @@
+import os
+import sys
 from tkinter import *
 import tkinter.font as tkFont
 from PIL import Image, ImageTk
 import requests
 import datetime
 from io import BytesIO
+
+# Function to locate resources in both .py and .exe
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS  # PyInstaller uses this
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 # Initialize Tkinter window
 root = Tk()
@@ -24,7 +34,6 @@ def get_city():
     city = search_bar.get()
     return city if city.strip() else "Nagpur"
 
-# Function to fetch weather data safely
 def get_weather():
     city = get_city()
     try:
@@ -38,7 +47,6 @@ def get_weather():
         print(f"Error fetching weather: {e}")
         return {}
 
-# Update all UI elements with new weather data
 def update_weather():
     response = get_weather()
     location = response.get('location', {})
@@ -69,25 +77,24 @@ def update_weather():
         except Exception as e:
             print("Failed to load icon:", e)
 
-# Load default icons
-search_icon = ImageTk.PhotoImage(Image.open("magnifier.png").resize((20, 20), Image.Resampling.LANCZOS))
-location_icon = ImageTk.PhotoImage(Image.open("location.png").resize((20, 20), Image.Resampling.LANCZOS))
-condition_icon = ImageTk.PhotoImage(Image.open("weather-app.png").resize((180, 180), Image.Resampling.LANCZOS))
+# Load default icons using resource_path
+search_icon = ImageTk.PhotoImage(Image.open(resource_path("magnifier.png")).resize((20, 20), Image.Resampling.LANCZOS))
+location_icon = ImageTk.PhotoImage(Image.open(resource_path("location.png")).resize((20, 20), Image.Resampling.LANCZOS))
+condition_icon = ImageTk.PhotoImage(Image.open(resource_path("weather-app.png")).resize((180, 180), Image.Resampling.LANCZOS))
 
-# Create labels and buttons
+# UI Elements
 exit_button = Button(root, text="Exit", command=root.quit, padx=20, pady=5, bg="#ec6d6d")
 clear_button = Button(root, text="Clear", command=clear_label, padx=20, pady=5, bg="#36e630")
 search_icon_button = Button(root, image=search_icon, command=update_weather)
 
 current_weather_label = Label(root, text="Current Weather:", padx=50, font='Arial 14 bold', fg="#dd5202")
-
 city_name = Label(root, text="-", font='Arial 12 bold')
 current_time = Label(root, text=datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S"), font='Arial 12 bold')
 temperature = Label(root, text="- °C", font='Arial 30 bold')
 
 humidity_tag = Label(root, text="Humidity", font='Arial 12 bold')
 humidity_value = Label(root, text="- %", font='Arial 12 bold')
-\
+
 wind_speed_tag = Label(root, text="Wind Speed", bg="#b1f0af", font='Arial 10 bold', width=15)
 wind_speed_value = Label(root, text="- KM/H (-)", bg="#b1f0af", font='Arial 10 bold', width=15)
 
@@ -150,5 +157,5 @@ feels_like_value.place(x=120, y=320)
 # Initial fetch
 update_weather()
 
-# Run Tkinter main loop
+# Main loop
 root.mainloop()
